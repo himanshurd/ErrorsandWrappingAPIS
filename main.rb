@@ -13,19 +13,16 @@ class MentalState
 end
 
 def audit_sanity(bedtime_mental_state)
-  raise InvalidMentalState.new("Mental State can't be zero") if audit_sanity(bedtime_mental_state) == 0
-  if bedtime_mental_state.audit!.ok?
+  begin
+    bedtime_mental_state.audit!
     MorningMentalState.new(:ok)
-  else 
+  rescue 
     MorningMentalState.new(:not_ok)
   end
 end
 
-begin
-  result = audit_sanity(1)
-rescue InvalidMentalState => e
-  puts e.message
-end
+new_state = audit_sanity(bedtime_mental_state)
+
 
 # Exercise 5 Part 2 (Don't Return Null / Null Object Pattern)
 
@@ -49,9 +46,18 @@ new_state.do_work
 
 # Exercise 5 Part 3 (Wrapping APIs)
 
-require 'candy_service'
+require "candy_service"
 
-machine = CandyMachine.new
+class MyCandyMachine < CandyMachine
+  def prepare
+    @real_candy_machine.prepare
+  end
+
+  def ready?; end
+  def make!; end
+end
+
+machine = CandyMachine.new()
 machine.prepare
 
 if machine.ready?
@@ -59,3 +65,4 @@ if machine.ready?
 else
   puts "sadness"
 end
+
